@@ -1,0 +1,258 @@
+/**
+ * *******************************************************
+ * AOS (Animate on scroll) - wowjs alternative
+ * made to animate elements on scroll in both directions
+ * *******************************************************
+ */
+
+// Modules & helpers
+import '../sass/aos.scss';
+
+
+import throttle from 'lodash.throttle';
+import debounce from 'lodash.debounce';
+
+import observer from './libs/observer';
+
+import detect from './helpers/detector';
+import { handleScrollWithRoot } from './helpers/handleScroll';
+import prepare from './helpers/prepare';
+import elements from './helpers/elements';
+import type { AosElement, AosSettings } from './helpers/model';
+
+
+
+/**
+ * Private variables
+ */
+let $aosElements = <AosElement[]>[];
+let initialized = false;
+
+/**
+ * Default options
+ */
+let options: AosSettings = <AosSettings>(<unknown>{
+  offset: 120,
+  delay: 0,
+  easing: 'ease',
+  duration: 400,
+  disable: false,
+  once: false,
+  mirror: false,
+  anchorPlacement: 'top-bottom',
+  startEvent: 'DOMContentLoaded',
+  animatedClassName: 'aos-animate',
+  initClassName: 'aos-init',
+  useClassNames: false,
+  disableMutationObserver: false,
+  throttleDelay: 99,
+  debounceDelay: 50,
+  root: window,
+});
+
+// Detect not supported browsers (<=IE9)
+// http://browserhacks.com/#hack-e71d8692f65334173fee715c222cb805
+// const isBrowserNotSupported = () => document.all && !window.atob;
+
+const allElements = document.all ?? document.querySelectorAll('*');
+
+const isBrowserNotSupported = () => {
+  // #TODO check if it work
+  return allElements.length && !window.atob;
+};
+
+const initializeScroll = function initializeScroll() {
+  // Extend elements objects in $aosElements with their positions
+  $aosElements = prepare($aosElements, options);
+
+  // Perform scroll event, to refresh view and show/hide elements
+  handleScrollWithRoot($aosElements, options.root);
+
+  /**
+   * Handle scroll event to animate elements on scroll
+   */
+  (options.root as unknown as Window).addEventListener(
+    'scroll',
+    throttle(() => {
+      handleScrollWithRoot($aosElements, options.root);
+    }, Number(options.throttleDelay)),
+  );
+
+  return $aosElements;
+};
+
+/**
+ * Refresh AOS
+ */
+const refresh = function refresh(initialize?: unknown) {
+  // Allow refresh only when it was first initialized on startEvent
+  if (initialize && initialize != false) {
+    initialized = true;
+  }
+  if (initialized) initializeScroll();
+};
+
+/**
+ * Hard refresh
+ * create array with new elements and trigger refresh
+ */
+const refreshHard = function refreshHard() {
+  $aosElements = <AosElement[]>elements();
+
+  if (isDisabled(options.disable) || isBrowserNotSupported()) {
+    return disable();
+  }
+
+  refresh();
+};
+
+/**
+ * Disable AOS
+ * Remove all attributes to reset applied styles
+ */
+const disable = function () {
+  $aosElements.forEach(function (el) {
+    el.node.removeAttribute('data-aos');
+    el.node.removeAttribute('data-aos-easing');
+    el.node.removeAttribute('data-aos-duration');
+    el.node.removeAttribute('data-aos-delay');
+
+    if (options.initClassName) {
+      el.node.classList.remove(options.initClassName);
+    }
+
+    if (options.animatedClassName) {
+      el.node.classList.remove(options.animatedClassName);
+    }
+  });
+};
+
+/**
+ * Check if AOS should be disabled based on provided setting
+ */
+const isDisabled = function (optionDisable: unknown) {
+  return (
+    optionDisable === true ||
+    (optionDisable === 'mobile' && detect.mobile()) ||
+    (optionDisable === 'phone' && detect.phone()) ||
+    (optionDisable === 'tablet' && detect.tablet()) ||
+    (typeof optionDisable === 'function' && optionDisable() === true)
+  );
+};
+
+/**
+ * Initializing AOS
+ * - Create options merging defaults with user defined options
+ * - Set attributes on <body> as global setting - css relies on it
+ * - Attach preparing elements to options.startEvent,
+ *   window resize and orientation change
+ * - Attach function that handle scroll and everything connected to it
+ *   to window scroll event and fire once document is ready to set initial state
+ */
+const init = function init(settings?: AosSettings) {
+  options = Object.assign(options, settings);
+
+  // Create initial array with elements -> to be fullfilled later with prepare()
+  $aosElements = <AosElement[]>elements();
+
+  /**
+   * Disable mutation observing if not supported
+   */
+  if (!options.disableMutationObserver && !observer.isSupported()) {
+    console.info(`
+      aos: MutationObserver is not supported on this browser,
+      code mutations observing has been disabled.
+      You may have to call "refreshHard()" by yourself.
+    `);
+    options.disableMutationObserver = true;
+  }
+
+  /**
+   * Observe [aos] elements
+   * If something is loaded by AJAX
+   * it'll refresh plugin automatically
+   */
+  if (!options.disableMutationObserver) {
+    observer.ready('[data-aos]', refreshHard);
+  }
+
+  /**
+   * Don't init plugin if option `disable` is set
+   * or when browser is not supported
+   */
+  if (isDisabled(options.disable) || isBrowserNotSupported()) {
+    return disable();
+  }
+
+  /**
+   * Set global settings on body, based on options
+   * so CSS can use it
+   */
+  document
+    .querySelector('body')
+    ?.setAttribute('data-aos-easing', String(options.easing));
+
+  document
+    .querySelector('body')
+    ?.setAttribute('data-aos-duration', String(options.duration));
+
+  document
+    .querySelector('body')
+    ?.setAttribute('data-aos-delay', String(options.delay));
+
+  /**
+   * Handle initializing
+   */
+  if (['DOMContentLoaded', 'load'].indexOf(String(options.startEvent)) === -1) {
+    // Listen to options.startEvent and initialize AOS
+    document.addEventListener(String(options.startEvent), function () {
+      refresh(true);
+    });
+  } else {
+    window.addEventListener('load', function () {
+      refresh(true);
+    });
+  }
+
+  if (
+    options.startEvent === 'DOMContentLoaded' &&
+    ['complete', 'interactive'].indexOf(document.readyState) > -1
+  ) {
+    // Initialize AOS if default startEvent was already fired
+    refresh(true);
+  }
+
+  /**
+   * Refresh plugin on window resize or orientation change
+   */
+  window.addEventListener(
+    'resize',
+    debounce(refresh, options.debounceDelay, {
+      leading: true,
+      trailing: false,
+    }),
+  );
+  // console.log('options.debounceDelay: ', options.debounceDelay);
+
+  window.addEventListener(
+    'orientationchange',
+    debounce(refresh, options.debounceDelay, {
+      leading: true,
+      trailing: false,
+    }),
+  );
+
+  return $aosElements;
+};
+
+/**
+ * Export Public API
+ */
+
+const AOS = {
+  init,
+  refresh,
+  refreshHard,
+}
+
+export default AOS;
