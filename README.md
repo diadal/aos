@@ -3,7 +3,7 @@
 [![NPM version](https://img.shields.io/npm/v/@diadal/aos)](https://npmjs.org/package/@diadal/aos)
 [![NPM downloads](https://img.shields.io/npm/dm/aos.svg?style=flat)](https://npmjs.org/package/@diadal/aos)
 <!-- [![Build Status](https://travis-ci.org/@diadal/aos?branch=master)](https://travis-ci.org/@diadal/aos) -->
-[![Gitter](https://badges.gitter.im/michalsnik/aos.svg)](https://gitter.im/michalsnik/aos?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+<!-- [![Gitter](https://badges.gitter.im/michalsnik/aos.svg)](https://gitter.im/michalsnik/aos?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) -->
 
 
 ## :exclamation::exclamation::exclamation: This is README for aos@next :exclamation::exclamation::exclamation:
@@ -30,12 +30,12 @@ This clone version of [aos](https://github.com/michalsnik/aos/tree/v2) converted
 Add styles in `<head>`:
 
 ```html
-  <link rel="stylesheet" href="https://unpkg.com/@diadal/aos@1.0.0/dist/css/aos.css" />
+  <link rel="stylesheet" href="https://unpkg.com/@diadal/aos/dist/css/aos.css" />
 ```
 
 Add script right before closing `</body>` tag, and initialize AOS:
 ```html
-  <script src="https://unpkg.com/@diadal/aos@1.0.0/dist/aos.umd.js"></script>
+  <script src="https://unpkg.com/@diadal/aos/dist/aos.umd.js"></script>
   <script>
     AOS.init();
   </script>
@@ -44,8 +44,8 @@ Add script right before closing `</body>` tag, and initialize AOS:
 ### Using package managers
 
 Install `aos` package:
-* `yarn add @diadal/aos@1.0.0`
-* or `npm install --save @diadal/aos@1.0.0`
+* `yarn add @diadal/aos`
+* or `npm install --save @diadal/aos`
 
 Import script, styles and initialize AOS:
 ```js

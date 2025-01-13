@@ -1,6 +1,6 @@
 {
   "name": "@diadal/aos",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "description": "Animate on scroll library",
   "homepage": "https://diadal.github.io/aos/",
@@ -16,7 +16,7 @@
   ],
   "keywords": [
     "aos for vue3",
-    "aos fo react ",
+    "aos fo react",
     "aos"
   ],
   "repository": {
