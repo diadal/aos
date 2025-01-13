@@ -1,6 +1,6 @@
 {
   "name": "@diadal/aos",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "type": "module",
   "description": "Animate on scroll library",
   "homepage": "https://diadal.github.io/aos/",
@@ -9,7 +9,7 @@
   "main": "dist/aos.js",
   "module": "dist/aos.cjs.js",
   "browser": "dist/aos.umd.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/aos.d.ts",
   "files": [
     "src",
     "dist"

@@ -81,44 +81,9 @@ export default defineConfig(
     ],
   },
   {
-    input: "dist/esm/types/src/index.d.ts",
+    input: "dist/aos.d.ts",
     output: [{ file: "dist/index.d.ts", format: "esm" }],
     external: [/\.(sc|sa|c)ss$/],
-    plugins: [transformStyles, dts()],
+    plugins: [dts()],
   },
 );
-
-// export default [
-//   {
-//     input,
-//     output: {
-//       file: pkg.browser,
-//       name: 'AOS',
-//       format: 'umd',
-//       sourcemap: process.env.NODE_ENV === 'dev'
-//     },
-//     plugins: [
-//       transformStyles,
-//       resolve(),
-//       commonjs(),
-//       babel({
-//         exclude: ['node_modules/**']
-//       }),
-//       uglify()
-//     ]
-//   },
-//   {
-//     input,
-//     external: Object.keys(pkg.dependencies),
-//     output: [
-//       { file: pkg.main, format: 'cjs' },
-//       { file: pkg.module, format: 'es' }
-//     ],
-//     plugins: [
-//       transformStyles,
-//       babel({
-//         exclude: ['node_modules/**']
-//       })
-//     ]
-//   }
-// ];
